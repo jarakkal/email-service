@@ -60,7 +60,7 @@ The Serverless Application Model Command Line Interface (SAM CLI) is an extensio
 To use the SAM CLI, you need the following tools.
 
 - Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
-- SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+- AWS SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 
 You may need the following for local testing.
 
@@ -83,7 +83,21 @@ The first command will build a docker image from a Dockerfile and then the sourc
 
 You can find your API Gateway Endpoint URL in the output values displayed after deployment.
 
-## Use the SAM CLI to build and test locally
+## Use AWS SAM CLI to build and test locally
+
+Download the applicaiton using git
+
+```bash
+site-minder-emailer$ git clone https://github.com/jarakkal/email-service.git
+```
+
+Install libs
+
+```bash
+site-minder-emailer$ cd email-service
+site-minder-emailer\email-service$ npm install
+site-minder-emailer\email-service$ cd ..
+```
 
 Build your application with the `sam build` command.
 
@@ -91,7 +105,7 @@ Build your application with the `sam build` command.
 site-minder-emailer$ sam build
 ```
 
-The SAM CLI builds a docker image from a Dockerfile and then installs dependencies defined in `hello-world/package.json` inside the docker image. The processed template file is saved in the `.aws-sam/build` folder.
+The SAM CLI builds a docker image from a Dockerfile and then installs dependencies defined in `email-service/package.json` inside the docker image. The processed template file is saved in the `.aws-sam/build` folder.
 
 - **Note**: The Dockerfile included in this sample application uses `npm install` by default. If you are building your code for production, you can modify it to use `npm ci` instead.
 
@@ -100,7 +114,7 @@ Test a single function by invoking it directly with a test event. An event is a 
 Run functions locally and invoke them with the `sam local invoke` command.
 
 ```bash
-site-minder-emailer$ sam local invoke HelloWorldFunction --event events/event.json
+site-minder-emailer$ sam local invoke --event events/event.json
 ```
 
 The SAM CLI can also emulate your application's API. Use the `sam local start-api` to run the API locally on port 3000.
@@ -245,5 +259,3 @@ email-service$ npm run test
 ## Resources
 
 See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
-
-Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
