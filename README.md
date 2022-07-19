@@ -14,16 +14,20 @@ The application uses AWS resources, including Lambda functions and an API Gatewa
 The service expects third party email api credentials to send emails.
 
 > `EmailDB` The DynamoDB table where the api requests are stored.
+
 > `EmailProviders` The name(s) for the email api seperated by semi-colon. This will also act as the stub for other variable associates with this API.
+
 > `<<EmailProvider defined above>>User` Username associated with the API.
+
 > `<<EmailProvider defined above>>Pass` This secret or private key associated with this API.
+
 > `<<EmailProvider defined above>>Path` The api endpoint without the hostname
+
 > `<<EmailProvider defined above>>Api` The hostname of the API,
-> `<<EmailProvider defined above>>Transport` This is instruct the service the medium of transportation of the request payload. The two supported options are `query` (passing data as query params in the url) and `body` (passing data as a JSON). ,
 
-````
+> `<<EmailProvider defined above>>Transport` This is instruct the service the medium of transportation of the request payload. The two supported options are `query` (passing data as query params in the url) and `body` (passing data as a JSON).
 
-An example for Mailgun API
+#### An example for Mailgun API
 
 ```sh
 EmailDB=MailsProcessed
@@ -33,7 +37,7 @@ MailgunPass=secretmailgunpassword
 MailgunPath=/v3/mydomainname.mailgun.org/messages
 MailgunApi=api.mailgun.net
 MailgunTransport=query
-````
+```
 
 This can be configured using the environment vars in your lambda instance manually or use the `samconfig.toml` file at the root level. `samconfig.toml` is generated **after you deploy** when you select `y` to the question - `Save arguments to samconfig.toml`. After the file is generated, edit it and add the `parameter_overrides` line as follows. Make sure to replace the ParameterValue(s) with the your prod credentials
 
