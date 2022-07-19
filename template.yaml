@@ -1,0 +1,151 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  site-minder-emailer
+
+  Send emails via thirdparty
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Parameters:
+  MailgunPass:
+    Type: String
+    Description: Mailgun private key
+  MailgunPath:
+    Type: String
+    Description: Mailgun api path
+  MailgunUser:
+    Type: String
+    Description: Mailgun api user
+  MailgunApi:
+    Type: String
+    Description: Mailgun api hostname
+  MailgunTransport:
+    Type: String
+    Description: Mailgun packet transport
+  MailjetPass:
+    Type: String
+    Description: Mailjet private key
+  MailjetPath:
+    Type: String
+    Description: Mailjet api path
+  MailjetUser:
+    Type: String
+    Description: Mailjet api user
+  MailjetApi:
+    Type: String
+    Description: Mailjet api hostname
+  MailjetTransport:
+    Type: String
+    Description: Mailjet packet transport
+  EmailProviders:
+    Type: String
+    Description: List of email providers
+  EmailDB:
+    Type: String
+    Description: DynamoDB table name
+
+Resources:
+  EmailServiceDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: MailsProcessed
+      AttributeDefinitions:
+        - AttributeName: SendId
+          AttributeType: S
+        - AttributeName: From
+          AttributeType: S
+      KeySchema:
+        - AttributeName: SendId
+          KeyType: HASH
+        - AttributeName: From
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  EmailApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: EmailApiGateway
+      StageName: Prod
+      Models:
+        EmailReqParamsModel:
+          $schema: "http://json-schema.org/draft-04/schema#"
+          title: EmailReqParamsModel
+          type: object
+          properties:
+            emailFrom:
+              type: string
+            emailTo:
+              type: string
+            emailCc:
+              type: string
+            emailBcc:
+              type: string
+            emailSubject:
+              type: string
+            emailContent:
+              type: string
+          required:
+            - emailFrom
+            - emailTo
+            - emailSubject
+            - emailContent
+
+  SendEmailFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Timeout: 10
+      Architectures:
+        - x86_64
+      Events:
+        SendEmail:
+          Type: Api
+          Properties:
+            RestApiId: !Ref EmailApiGateway
+            Path: /send
+            Method: POST
+            RequestModel:
+              Model: EmailReqParamsModel
+              Required: true
+              ValidateBody: true
+      Policies:
+        DynamoDBWritePolicy:
+          TableName: !Ref EmailServiceDB
+      Environment:
+        Variables:
+          MailgunPass: !Ref MailgunPass
+          MailgunPath: !Ref MailgunPath
+          MailgunUser: !Ref MailgunUser
+          MailgunApi: !Ref MailgunApi
+          MailgunTransport: !Ref MailgunTransport
+          MailjetPass: !Ref MailjetPass
+          MailjetPath: !Ref MailjetPath
+          MailjetUser: !Ref MailjetUser
+          MailjetApi: !Ref MailjetApi
+          MailjetTransport: !Ref MailjetTransport
+          EmailProviders: !Ref EmailProviders
+          EmailDB: !Ref EmailDB
+    Metadata:
+      DockerTag: nodejs16.x-v1
+      DockerContext: ./email-service
+      Dockerfile: Dockerfile
+
+Outputs:
+  SendEmailApi:
+    Description: "API Gateway endpoint URL for Prod stage for Send Email function"
+    Value: !Sub "https://${EmailApiGateway}.execute-api.${AWS::Region}.amazonaws.com/Prod/send/"
+  SendEmailFunction:
+    Description: "Send Email Lambda Function ARN"
+    Value: !GetAtt SendEmailFunction.Arn
+  EmailServiceDB:
+    Description: "DB to store the list of email requests"
+    Value: !GetAtt EmailServiceDB.Arn
+  SendEmailFunctionIamRole:
+    Description: "Implicit IAM Role created for Send Email function"
+    Value: !GetAtt SendEmailFunctionRole.Arn

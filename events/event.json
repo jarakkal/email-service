@@ -1,0 +1,8 @@
+{
+  "body": {
+    "emailFrom": "jentojoy@gmail.com",
+    "emailTo": "jentojoy@gmail.com",
+    "emailSubject": "a sub",
+    "emailContent": "some body text"
+  }
+}
